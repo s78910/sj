@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">qingli</string>
+    <string name="header_text">刷机做环境找微信S78910JQKKKAA</string>
+    <string name="btn_clean">清理</string>
+    <string name="output_hint">点击清理按钮执行脚本</string>
 </resources>
