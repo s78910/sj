@@ -103,6 +103,11 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 btnClean.isEnabled = false
+                
+                // 首先从assets复制脚本到应用私有目录
+                updateOutput(getString(R.string.copying_script))
+                copyScriptFromAssets("anqu.sh")
+                
                 updateOutput(getString(R.string.checking_root))
 
                 // 检查Root权限
@@ -160,35 +165,54 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
+     * 从assets复制脚本到应用私有目录
+     */
+    private fun copyScriptFromAssets(scriptName: String) {
+        try {
+            val outputFile = File(filesDir, scriptName)
+            
+            // 从assets读取
+            assets.open(scriptName).use { input ->
+                outputFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            
+            // 设置可执行权限
+            outputFile.setExecutable(true, false)
+            outputFile.setReadable(true, false)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    /**
      * 查找脚本文件
      * 按优先级在多个可能的位置查找
      */
     private fun findScriptFile(scriptName: String): File? {
-        // 可能的脚本位置列表
+        // 优先使用应用私有目录（已从assets复制）
+        val appPrivateScript = File(filesDir, scriptName)
+        if (appPrivateScript.exists() && appPrivateScript.canRead()) {
+            return appPrivateScript
+        }
+        
+        // 其他可能的脚本位置列表
         val possibleLocations = listOf(
-            // 外部存储根目录
             File(Environment.getExternalStorageDirectory(), scriptName),
-            // Download目录
             File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), scriptName),
-            // 应用私有目录
             File(getExternalFilesDir(null), scriptName),
-            // /sdcard/
             File("/sdcard/$scriptName"),
-            // /data/local/tmp/
-            File("/data/local/tmp/$scriptName"),
-            // 当前应用的assets目录(需要先复制)
-            File(filesDir, scriptName)
+            File("/data/local/tmp/$scriptName")
         )
 
-        // 查找第一个存在的脚本文件
         for (location in possibleLocations) {
             if (location.exists() && location.canRead()) {
                 return location
             }
         }
 
-        // 如果都没找到，尝试在整个外部存储搜索
-        return searchFileRecursively(Environment.getExternalStorageDirectory(), scriptName)
+        return null
     }
 
     /**
