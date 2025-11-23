@@ -4,4 +4,18 @@
     <string name="header_text">刷机做环境找微信S78910JQKKKAA</string>
     <string name="btn_clean">清理</string>
     <string name="output_hint">点击清理按钮执行脚本</string>
+    
+    <!-- MainActivity strings -->
+    <string name="permission_storage_required">需要存储权限才能访问脚本文件</string>
+    <string name="checking_root">正在检查Root权限…\n</string>
+    <string name="root_denied">错误: 设备未获取Root权限或Root权限被拒绝\n</string>
+    <string name="root_required">需要Root权限</string>
+    <string name="root_granted">Root权限已获取\n正在查找anqu.sh脚本…\n</string>
+    <string name="script_not_found">错误: 未找到anqu.sh脚本文件\n</string>
+    <string name="script_not_found_toast">未找到脚本文件</string>
+    <string name="script_found">找到脚本: %1$s\n正在执行…\n</string>
+    <string name="execution_result">\n执行结果:\n%1$s\n</string>
+    <string name="execution_complete">脚本执行完成</string>
+    <string name="execution_error">\n错误: %1$s\n</string>
+    <string name="execution_failed">执行失败: %1$s</string>
 </resources>

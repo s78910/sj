@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == PERMISSION_REQUEST_CODE) {
             val allGranted = grantResults.all { it == PackageManager.PERMISSION_GRANTED }
             if (!allGranted) {
-                Toast.makeText(this, "需要存储权限才能访问脚本文件", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.permission_storage_required), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -103,38 +103,38 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 btnClean.isEnabled = false
-                updateOutput("正在检查Root权限...\n")
+                updateOutput(getString(R.string.checking_root))
 
                 // 检查Root权限
                 if (!checkRootAccess()) {
-                    updateOutput("错误: 设备未获取Root权限或Root权限被拒绝\n", true)
-                    Toast.makeText(this@MainActivity, "需要Root权限", Toast.LENGTH_SHORT).show()
+                    updateOutput(getString(R.string.root_denied), true)
+                    Toast.makeText(this@MainActivity, getString(R.string.root_required), Toast.LENGTH_SHORT).show()
                     btnClean.isEnabled = true
                     return@launch
                 }
 
-                updateOutput("Root权限已获取\n正在查找anqu.sh脚本...\n", true)
+                updateOutput(getString(R.string.root_granted), true)
 
                 // 查找脚本文件
                 val scriptFile = findScriptFile("anqu.sh")
                 if (scriptFile == null || !scriptFile.exists()) {
-                    updateOutput("错误: 未找到anqu.sh脚本文件\n", true)
-                    Toast.makeText(this@MainActivity, "未找到脚本文件", Toast.LENGTH_SHORT).show()
+                    updateOutput(getString(R.string.script_not_found), true)
+                    Toast.makeText(this@MainActivity, getString(R.string.script_not_found_toast), Toast.LENGTH_SHORT).show()
                     btnClean.isEnabled = true
                     return@launch
                 }
 
-                updateOutput("找到脚本: ${scriptFile.absolutePath}\n正在执行...\n", true)
+                updateOutput(getString(R.string.script_found, scriptFile.absolutePath), true)
 
                 // 执行脚本
                 val result = executeRootCommand("sh ${scriptFile.absolutePath}")
-                updateOutput("\n执行结果:\n$result\n", true)
+                updateOutput(getString(R.string.execution_result, result), true)
 
-                Toast.makeText(this@MainActivity, "脚本执行完成", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MainActivity, getString(R.string.execution_complete), Toast.LENGTH_SHORT).show()
 
             } catch (e: Exception) {
-                updateOutput("\n错误: ${e.message}\n", true)
-                Toast.makeText(this@MainActivity, "执行失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                updateOutput(getString(R.string.execution_error, e.message ?: ""), true)
+                Toast.makeText(this@MainActivity, getString(R.string.execution_failed, e.message ?: ""), Toast.LENGTH_SHORT).show()
             } finally {
                 btnClean.isEnabled = true
             }
