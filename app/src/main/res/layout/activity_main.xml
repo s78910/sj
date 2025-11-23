@@ -19,14 +19,32 @@
         android:gravity="center"
         android:padding="16dp" />
 
-    <Button
-        android:id="@+id/btnClean"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/btn_clean"
-        android:textSize="18sp"
-        android:layout_marginTop="16dp"
-        android:backgroundTint="#4CAF50" />
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp">
+        
+        <Button
+            android:id="@+id/btnClean"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/btn_clean"
+            android:textSize="18sp"
+            android:layout_marginEnd="8dp"
+            android:backgroundTint="#4CAF50" />
+        
+        <Button
+            android:id="@+id/btnReboot"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/btn_reboot"
+            android:textSize="18sp"
+            android:layout_marginStart="8dp"
+            android:backgroundTint="#FF5722" />
+    </LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"

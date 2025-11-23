@@ -5,6 +5,11 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.app.AlertDialog
+import android.graphics.Color
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -26,6 +31,7 @@ import java.io.InputStreamReader
 class MainActivity : AppCompatActivity() {
 
     private lateinit var btnClean: Button
+    private lateinit var btnReboot: Button
     private lateinit var tvOutput: TextView
     private val PERMISSION_REQUEST_CODE = 1001
 
@@ -42,10 +48,15 @@ class MainActivity : AppCompatActivity() {
      */
     private fun initViews() {
         btnClean = findViewById(R.id.btnClean)
+        btnReboot = findViewById(R.id.btnReboot)
         tvOutput = findViewById(R.id.tvOutput)
 
         btnClean.setOnClickListener {
             executeCleanScript()
+        }
+        
+        btnReboot.setOnClickListener {
+            showRebootConfirmDialog()
         }
     }
 
@@ -129,11 +140,18 @@ class MainActivity : AppCompatActivity() {
                     return@launch
                 }
 
-                updateOutput(getString(R.string.script_found, scriptFile.absolutePath), true)
-
-                // 执行脚本
+                // 执行脚本（删除了"找到脚本"和"正在执行"提示）
                 val result = executeRootCommand("sh ${scriptFile.absolutePath}")
-                updateOutput(getString(R.string.execution_result, result), true)
+                
+                // 过滤掉sed错误和chmod错误
+                val filteredResult = result.split("\n").filter { line ->
+                    !line.contains("sed: no previous regex") &&
+                    !line.contains("chmod:") &&
+                    !line.contains("No such file or directory") ||
+                    (!line.contains("chmod") && line.contains("No such file or directory"))
+                }.joinToString("\n")
+                
+                updateOutputWithColor(filteredResult)
 
                 Toast.makeText(this@MainActivity, getString(R.string.execution_complete), Toast.LENGTH_SHORT).show()
 
@@ -336,6 +354,124 @@ class MainActivity : AppCompatActivity() {
             val scrollView = tvOutput.parent as? android.widget.ScrollView
             scrollView?.post {
                 scrollView.fullScroll(android.view.View.FOCUS_DOWN)
+            }
+        }
+    }
+    
+    /**
+     * 更新输出文本并支持ANSI颜色代码
+     * @param text 包含ANSI颜色代码的文本
+     */
+    private suspend fun updateOutputWithColor(text: String) {
+        withContext(Dispatchers.Main) {
+            val spannable = SpannableStringBuilder()
+            
+            // ANSI颜色代码映射
+            val ansiColorMap = mapOf(
+                "30" to Color.BLACK,
+                "31" to Color.RED,
+                "32" to Color.GREEN,
+                "33" to Color.YELLOW,
+                "34" to Color.BLUE,
+                "35" to Color.MAGENTA,
+                "36" to Color.CYAN,
+                "37" to Color.WHITE,
+                "90" to Color.DKGRAY,
+                "91" to Color.rgb(255, 100, 100),
+                "92" to Color.rgb(100, 255, 100),
+                "93" to Color.rgb(255, 255, 100),
+                "94" to Color.rgb(100, 100, 255),
+                "95" to Color.rgb(255, 100, 255),
+                "96" to Color.rgb(100, 255, 255),
+                "97" to Color.rgb(240, 240, 240)
+            )
+            
+            // 解析ANSI颜色代码
+            val ansiRegex = Regex("\\x1B\\[(\\d+)m")
+            var lastEnd = 0
+            var currentColor: Int? = null
+            
+            ansiRegex.findAll(text).forEach { match ->
+                // 添加前面的普通文本
+                val beforeText = text.substring(lastEnd, match.range.first)
+                val start = spannable.length
+                spannable.append(beforeText)
+                
+                // 如果有当前颜色，应用到前面的文本
+                if (currentColor != null && beforeText.isNotEmpty()) {
+                    spannable.setSpan(
+                        ForegroundColorSpan(currentColor!!),
+                        start,
+                        spannable.length,
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                }
+                
+                // 更新当前颜色
+                val colorCode = match.groupValues[1]
+                currentColor = when (colorCode) {
+                    "0" -> null  // 重置颜色
+                    else -> ansiColorMap[colorCode]
+                }
+                
+                lastEnd = match.range.last + 1
+            }
+            
+            // 添加剩余文本
+            val remainingText = text.substring(lastEnd)
+            val start = spannable.length
+            spannable.append(remainingText)
+            if (currentColor != null && remainingText.isNotEmpty()) {
+                spannable.setSpan(
+                    ForegroundColorSpan(currentColor!!),
+                    start,
+                    spannable.length,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+            
+            // 显示处理后的文本
+            tvOutput.append(spannable)
+            
+            // 自动滚动到底部
+            val scrollView = tvOutput.parent as? android.widget.ScrollView
+            scrollView?.post {
+                scrollView.fullScroll(android.view.View.FOCUS_DOWN)
+            }
+        }
+    }
+    
+    /**
+     * 显示重启确认对话框
+     */
+    private fun showRebootConfirmDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.btn_reboot))
+            .setMessage(getString(R.string.reboot_confirm))
+            .setPositiveButton(getString(R.string.yes)) { _, _ ->
+                executeReboot()
+            }
+            .setNegativeButton(getString(R.string.no), null)
+            .show()
+    }
+    
+    /**
+     * 执行重启命令
+     */
+    private fun executeReboot() {
+        lifecycleScope.launch {
+            try {
+                Toast.makeText(this@MainActivity, getString(R.string.rebooting), Toast.LENGTH_SHORT).show()
+                
+                withContext(Dispatchers.IO) {
+                    val process = Runtime.getRuntime().exec("su")
+                    val outputStream = process.outputStream
+                    outputStream.write("reboot\n".toByteArray())
+                    outputStream.flush()
+                    outputStream.close()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(this@MainActivity, "重启失败: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
