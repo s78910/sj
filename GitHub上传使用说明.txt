@@ -1,0 +1,130 @@
+═══════════════════════════════════════════════════════════
+  GitHub在线构建 - 详细步骤
+═══════════════════════════════════════════════════════════
+
+【前提条件】
+1. 你需要有GitHub账号（没有的话去 github.com 免费注册）
+2. 在GitHub上创建名为"sj"的仓库（如果还没有）
+
+
+【方式1：使用自动脚本（最简单）】?????
+
+1. 确保GitHub上已创建"sj"仓库
+   - 登录 github.com
+   - 点击右上角 "+" → "New repository"
+   - Repository name: sj
+   - 选择 Public 或 Private
+   - 不要勾选 "Initialize this repository with a README"
+   - 点击 "Create repository"
+
+2. 双击运行: 上传到GitHub.bat
+
+3. 按提示操作:
+   - 首次使用会要求输入GitHub用户名和邮箱
+   - 输入完整仓库地址，格式:
+     https://github.com/你的用户名/sj.git
+   
+4. 输入密码/Token:
+   ?? 注意: GitHub不再支持密码登录
+   需要使用 Personal Access Token (PAT)
+   
+   获取Token:
+   - 进入 GitHub → Settings
+   - Developer settings → Personal access tokens → Tokens (classic)
+   - Generate new token
+   - 勾选 "repo" 权限
+   - 复制生成的token（只显示一次！）
+   - 在命令行输入token作为密码
+
+5. 等待上传完成
+
+6. 查看GitHub Actions构建:
+   - 访问: https://github.com/你的用户名/sj/actions
+   - 等待约5-10分钟
+   - 构建完成后下载APK
+
+
+【方式2：手动操作】
+
+1. 打开PowerShell或CMD，进入项目目录:
+   cd H:\1\app
+
+2. 初始化Git（如果未初始化）:
+   git init
+
+3. 配置用户信息（首次使用）:
+   git config --global user.name "你的GitHub用户名"
+   git config --global user.email "你的邮箱"
+
+4. 添加所有文件:
+   git add .
+
+5. 创建提交:
+   git commit -m "qingli应用完整代码"
+
+6. 连接远程仓库:
+   git remote add origin https://github.com/你的用户名/sj.git
+
+7. 推送到GitHub:
+   git branch -M main
+   git push -u origin main
+
+8. 输入用户名和Token完成认证
+
+
+【查看构建结果】
+
+上传成功后，GitHub会自动开始构建APK:
+
+1. 访问仓库的Actions页面:
+   https://github.com/你的用户名/sj/actions
+
+2. 点击最新的workflow run
+
+3. 等待构建完成（绿色?表示成功）
+
+4. 在页面底部的 "Artifacts" 部分找到 "app-debug"
+
+5. 点击下载（会下载一个zip文件）
+
+6. 解压得到 app-debug.apk
+
+
+【常见问题】
+
+Q: 推送时提示"Authentication failed"?
+A: 使用Personal Access Token而不是密码
+   Token获取见上方说明
+
+Q: 提示"fatal: remote origin already exists"?
+A: 先删除旧的远程连接:
+   git remote remove origin
+   然后重新添加
+
+Q: 构建失败（红色X）?
+A: 点击查看详细日志，常见原因:
+   - gradlew文件没有执行权限（已自动处理）
+   - 依赖下载失败（GitHub会自动重试）
+
+Q: 如何更新代码?
+A: 修改后重新运行上传脚本，或使用:
+   git add .
+   git commit -m "更新说明"
+   git push
+
+
+【Token安全提示】
+
+?? Personal Access Token等同于密码
+- 不要分享给他人
+- 不要提交到代码中
+- 如果泄露，立即在GitHub上删除并重新生成
+
+
+【下一步】
+
+上传成功后，每次你修改代码并推送，GitHub都会自动构建新的APK！
+
+═══════════════════════════════════════════════════════════
+  刷机做环境找微信: S78910JQKKKAA
+═══════════════════════════════════════════════════════════
