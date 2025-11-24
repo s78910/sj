@@ -22,4 +22,7 @@
     <string name="yes">&#x786E;&#x5B9A;</string>
     <string name="no">&#x53D6;&#x6D88;</string>
     <string name="rebooting">&#x6B63;&#x5728;&#x91CD;&#x542F;&#x2026;</string>
+    <string name="clean_notice_title">&#x91CD;&#x8981;&#x63D0;&#x793A;</string>
+    <string name="clean_notice_message">&#x4E0D;&#x8981;&#x9000;&#x51FA;&#x540E;&#x53F0;\n&#x4E0D;&#x8981;&#x63D0;&#x524D;&#x91CD;&#x542F;&#xFF0C;&#x76F4;&#x5230;&#x6587;&#x5B57;&#x63D0;&#x793A;\n\n&#x5982;&#x679C;&#x8981;&#x6E05;&#x7406;&#x5176;&#x4ED6;&#x5E94;&#x7528;&#x4E5F;&#x53EF;&#x4EE5;&#xFF0C;&#x4F46;&#x662F;&#x9700;&#x8981;&#x624B;&#x52A8;&#x5378;&#x8F7D;&#x6E38;&#x620F;&#x91CD;&#x88C5;</string>
+    <string name="i_know">&#x6211;&#x77E5;&#x9053;&#x4E86;</string>
 </resources>

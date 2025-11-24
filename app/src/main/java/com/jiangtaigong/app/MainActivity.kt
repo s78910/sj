@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
         tvOutput = findViewById(R.id.tvOutput)
 
         btnClean.setOnClickListener {
-            executeCleanScript()
+            showCleanNoticeDialog()
         }
         
         btnReboot.setOnClickListener {
@@ -439,6 +439,20 @@ class MainActivity : AppCompatActivity() {
                 scrollView.fullScroll(android.view.View.FOCUS_DOWN)
             }
         }
+    }
+    
+    /**
+     * 显示清理前的重要提示对话框
+     */
+    private fun showCleanNoticeDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.clean_notice_title))
+            .setMessage(getString(R.string.clean_notice_message))
+            .setPositiveButton(getString(R.string.i_know)) { _, _ ->
+                executeCleanScript()
+            }
+            .setCancelable(false)
+            .show()
     }
     
     /**
