@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">rootlist</string>
+    <string name="header_text">\u5237\u673a\u505a\u73af\u5883\u627e\u5fae\u4fe1S78910JQKKKAA</string>
+    <string name="root_granted">\u2713 \u5df2\u83b7\u53d6Root\u6743\u9650 - \u70b9\u51fb\u5e94\u7528\u89e6\u53d1\u6388\u6743</string>
+    <string name="root_not_granted">\u2717 \u672a\u83b7\u53d6Root\u6743\u9650 - \u8bf7\u5148\u6388\u4e88\u672c\u5e94\u7528Root\u6743\u9650</string>
+    <string name="permission_error">\u65e0\u6cd5\u83b7\u53d6\u5e94\u7528\u5217\u8868\uff0c\u8bf7\u68c0\u67e5\u6743\u9650</string>
+    <string name="need_root_first">\u8bf7\u5148\u6388\u4e88\u672c\u5e94\u7528Root\u6743\u9650</string>
+    <string name="trigger_root_title">\u89e6\u53d1Root\u6388\u6743</string>
+    <string name="trigger_root_message">\u662f\u5426\u4e3a %1$s \u89e6\u53d1Root\u6743\u9650\u7533\u8bf7\u5f39\u7a97\uff1f\n\n\u5305\u540d: %2$s\nUID: %3$d</string>
+    <string name="confirm">\u786e\u5b9a</string>
+    <string name="cancel">\u53d6\u6d88</string>
+    <string name="trigger_success">\u5df2\u89e6\u53d1 %1$s \u7684Root\u6388\u6743\u8bf7\u6c42</string>
+    <string name="trigger_failed">\u6267\u884c\u5931\u8d25: %1$s</string>
 </resources>

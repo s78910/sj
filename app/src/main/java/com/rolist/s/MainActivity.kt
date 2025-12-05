@@ -14,15 +14,15 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.DataOutputStream
 import java.io.InputStreamReader
 
-/**
- * Root权限授予工具主界面
- * 功能：列出所有已安装应用，点击后触发该应用的Root权限申请弹窗
- */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
@@ -35,54 +35,41 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         initViews()
         checkRootAccess()
         loadInstalledApps()
     }
 
-    /**
-     * 初始化视图组件
-     */
     private fun initViews() {
         tvHeader = findViewById(R.id.tvHeader)
         tvStatus = findViewById(R.id.tvStatus)
         recyclerView = findViewById(R.id.recyclerView)
-
-        // 设置顶部提示文本
-        tvHeader.text = "刷机做环境找微信S78910JQKKKAA"
-
-        // 配置RecyclerView
+        tvHeader.text = getString(R.string.header_text)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = AppListAdapter(appList) { appInfo ->
-            onAppClick(appInfo)
-        }
+        adapter = AppListAdapter(appList) { appInfo -> onAppClick(appInfo) }
         recyclerView.adapter = adapter
     }
 
-    /**
-     * 检查Root权限
-     */
     private fun checkRootAccess() {
         CoroutineScope(Dispatchers.IO).launch {
             hasRootAccess = checkRoot()
             withContext(Dispatchers.Main) {
-                if (hasRootAccess) {
-                    tvStatus.text = "✓ 已获取Root权限 - 点击应用触发授权"
-                    tvStatus.setTextColor(0xFF4CAF50.toInt())
-                } else {
-                    tvStatus.text = "✗ 未获取Root权限 - 请先授予本应用Root权限"
-                    tvStatus.setTextColor(0xFFF44336.toInt())
-                    // 尝试请求Root权限
-                    requestRootAccess()
-                }
+                updateRootStatus()
             }
         }
     }
 
-    /**
-     * 检查是否有Root权限
-     */
+    private fun updateRootStatus() {
+        if (hasRootAccess) {
+            tvStatus.text = getString(R.string.root_granted)
+            tvStatus.setTextColor(0xFF4CAF50.toInt())
+        } else {
+            tvStatus.text = getString(R.string.root_not_granted)
+            tvStatus.setTextColor(0xFFF44336.toInt())
+            requestRootAccess()
+        }
+    }
+
     private fun checkRoot(): Boolean {
         return try {
             val process = Runtime.getRuntime().exec("su -c id")
@@ -95,9 +82,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * 请求Root权限
-     */
     private fun requestRootAccess() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -107,25 +91,15 @@ class MainActivity : AppCompatActivity() {
                 os.writeBytes("exit\n")
                 os.flush()
                 process.waitFor()
-                
-                // 重新检查Root状态
                 delay(1000)
                 hasRootAccess = checkRoot()
-                withContext(Dispatchers.Main) {
-                    if (hasRootAccess) {
-                        tvStatus.text = "✓ 已获取Root权限 - 点击应用触发授权"
-                        tvStatus.setTextColor(0xFF4CAF50.toInt())
-                    }
-                }
+                withContext(Dispatchers.Main) { updateRootStatus() }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
 
-    /**
-     * 加载已安装的应用列表
-     */
     private fun loadInstalledApps() {
         CoroutineScope(Dispatchers.IO).launch {
             val pm = packageManager
@@ -133,24 +107,21 @@ class MainActivity : AppCompatActivity() {
                 pm.getInstalledApplications(PackageManager.GET_META_DATA)
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(this@MainActivity, "无法获取应用列表，请检查权限", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@MainActivity, R.string.permission_error, Toast.LENGTH_LONG).show()
                 }
                 return@launch
             }
-
             val apps = packages.mapNotNull { appInfo ->
                 try {
-                    val appName = pm.getApplicationLabel(appInfo).toString()
-                    val packageName = appInfo.packageName
-                    val icon = pm.getApplicationIcon(appInfo)
-                    val uid = appInfo.uid
-                    val isSystemApp = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0
-                    AppInfo(appName, packageName, icon, uid, isSystemApp)
-                } catch (e: Exception) {
-                    null
-                }
+                    AppInfo(
+                        pm.getApplicationLabel(appInfo).toString(),
+                        appInfo.packageName,
+                        pm.getApplicationIcon(appInfo),
+                        appInfo.uid,
+                        (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0
+                    )
+                } catch (e: Exception) { null }
             }.sortedWith(compareBy({ it.isSystemApp }, { it.appName.lowercase() }))
-
             withContext(Dispatchers.Main) {
                 appList.clear()
                 appList.addAll(apps)
@@ -159,82 +130,36 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * 应用点击事件 - 触发目标应用的Root权限申请
-     */
     private fun onAppClick(appInfo: AppInfo) {
         if (!hasRootAccess) {
-            Toast.makeText(this, "请先授予本应用Root权限", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.need_root_first, Toast.LENGTH_SHORT).show()
             requestRootAccess()
             return
         }
-
         AlertDialog.Builder(this)
-            .setTitle("触发Root授权")
-            .setMessage("是否为 ${appInfo.appName} 触发Root权限申请弹窗？\n\n包名: ${appInfo.packageName}\nUID: ${appInfo.uid}")
-            .setPositiveButton("确定") { _, _ ->
-                triggerRootRequest(appInfo)
-            }
-            .setNegativeButton("取消", null)
+            .setTitle(R.string.trigger_root_title)
+            .setMessage(getString(R.string.trigger_root_message, appInfo.appName, appInfo.packageName, appInfo.uid))
+            .setPositiveButton(R.string.confirm) { _, _ -> triggerRootRequest(appInfo) }
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
-    /**
-     * 以目标应用身份触发Root权限申请
-     * 原理：使用su命令切换到目标应用的UID，然后执行su请求
-     */
     private fun triggerRootRequest(appInfo: AppInfo) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                // 方法1: 使用su的uid参数以目标应用身份请求root
-                val commands = arrayOf(
-                    "su ${appInfo.uid} -c su",
-                    "su -c 'su ${appInfo.uid} -c su'"
-                )
-                
-                var success = false
-                for (cmd in commands) {
-                    try {
-                        val process = Runtime.getRuntime().exec(arrayOf("su", "-c", cmd))
-                        // 不等待完成，让授权弹窗显示
-                        delay(500)
-                        success = true
-                        break
-                    } catch (e: Exception) {
-                        continue
-                    }
-                }
-
+                Runtime.getRuntime().exec(arrayOf("su", "-c", "su ${appInfo.uid} -c su"))
+                delay(500)
                 withContext(Dispatchers.Main) {
-                    if (success) {
-                        Toast.makeText(
-                            this@MainActivity,
-                            "已触发 ${appInfo.appName} 的Root授权请求",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    } else {
-                        Toast.makeText(
-                            this@MainActivity,
-                            "触发失败，请检查Root管理器设置",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
+                    Toast.makeText(this@MainActivity, getString(R.string.trigger_success, appInfo.appName), Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        this@MainActivity,
-                        "执行失败: ${e.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(this@MainActivity, getString(R.string.trigger_failed, e.message), Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
-    /**
-     * 应用信息数据类
-     */
     data class AppInfo(
         val appName: String,
         val packageName: String,
@@ -243,9 +168,6 @@ class MainActivity : AppCompatActivity() {
         val isSystemApp: Boolean
     )
 
-    /**
-     * 应用列表适配器
-     */
     class AppListAdapter(
         private val apps: List<AppInfo>,
         private val onItemClick: (AppInfo) -> Unit
@@ -259,8 +181,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_app, parent, false)
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_app, parent, false)
             return ViewHolder(view)
         }
 
@@ -270,17 +191,8 @@ class MainActivity : AppCompatActivity() {
             holder.tvAppName.text = app.appName
             holder.tvPackageName.text = app.packageName
             holder.tvUid.text = "UID: ${app.uid}"
-            
-            // 系统应用标记
-            if (app.isSystemApp) {
-                holder.tvAppName.setTextColor(0xFF888888.toInt())
-            } else {
-                holder.tvAppName.setTextColor(0xFF000000.toInt())
-            }
-
-            holder.itemView.setOnClickListener {
-                onItemClick(app)
-            }
+            holder.tvAppName.setTextColor(if (app.isSystemApp) 0xFF888888.toInt() else 0xFF000000.toInt())
+            holder.itemView.setOnClickListener { onItemClick(app) }
         }
 
         override fun getItemCount() = apps.size
