@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.rolist.s"
-    compileSdk = 35
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.rolist.s"
         minSdk = 29  // Android 10
-        targetSdk = 35  // Android 15+
+        targetSdk = 34  // Android 14
         versionCode = 1
         versionName = "1.0"
     }
