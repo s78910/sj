@@ -14,14 +14,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.DataOutputStream
 import java.io.InputStreamReader
+import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
 
@@ -31,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: AppListAdapter
     private val appList = mutableListOf<AppInfo>()
     private var hasRootAccess = false
+    private val executor = Executors.newSingleThreadExecutor()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,29 +41,25 @@ class MainActivity : AppCompatActivity() {
         tvHeader = findViewById(R.id.tvHeader)
         tvStatus = findViewById(R.id.tvStatus)
         recyclerView = findViewById(R.id.recyclerView)
-        tvHeader.text = getString(R.string.header_text)
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = AppListAdapter(appList) { appInfo -> onAppClick(appInfo) }
         recyclerView.adapter = adapter
     }
 
     private fun checkRootAccess() {
-        CoroutineScope(Dispatchers.IO).launch {
+        executor.execute {
             hasRootAccess = checkRoot()
-            withContext(Dispatchers.Main) {
-                updateRootStatus()
-            }
+            runOnUiThread { updateRootStatus() }
         }
     }
 
     private fun updateRootStatus() {
         if (hasRootAccess) {
-            tvStatus.text = getString(R.string.root_granted)
+            tvStatus.text = "Root OK"
             tvStatus.setTextColor(0xFF4CAF50.toInt())
         } else {
-            tvStatus.text = getString(R.string.root_not_granted)
+            tvStatus.text = "No Root"
             tvStatus.setTextColor(0xFFF44336.toInt())
-            requestRootAccess()
         }
     }
 
@@ -82,35 +75,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun requestRootAccess() {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val process = Runtime.getRuntime().exec("su")
-                val os = DataOutputStream(process.outputStream)
-                os.writeBytes("id\n")
-                os.writeBytes("exit\n")
-                os.flush()
-                process.waitFor()
-                delay(1000)
-                hasRootAccess = checkRoot()
-                withContext(Dispatchers.Main) { updateRootStatus() }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
     private fun loadInstalledApps() {
-        CoroutineScope(Dispatchers.IO).launch {
+        executor.execute {
             val pm = packageManager
-            val packages = try {
-                pm.getInstalledApplications(PackageManager.GET_META_DATA)
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@MainActivity, R.string.permission_error, Toast.LENGTH_LONG).show()
-                }
-                return@launch
-            }
+            val packages = pm.getInstalledApplications(PackageManager.GET_META_DATA)
             val apps = packages.mapNotNull { appInfo ->
                 try {
                     AppInfo(
@@ -121,8 +89,8 @@ class MainActivity : AppCompatActivity() {
                         (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0
                     )
                 } catch (e: Exception) { null }
-            }.sortedWith(compareBy({ it.isSystemApp }, { it.appName.lowercase() }))
-            withContext(Dispatchers.Main) {
+            }.sortedBy { it.appName.lowercase() }
+            runOnUiThread {
                 appList.clear()
                 appList.addAll(apps)
                 adapter.notifyDataSetChanged()
@@ -132,29 +100,27 @@ class MainActivity : AppCompatActivity() {
 
     private fun onAppClick(appInfo: AppInfo) {
         if (!hasRootAccess) {
-            Toast.makeText(this, R.string.need_root_first, Toast.LENGTH_SHORT).show()
-            requestRootAccess()
+            Toast.makeText(this, "Need Root", Toast.LENGTH_SHORT).show()
             return
         }
         AlertDialog.Builder(this)
-            .setTitle(R.string.trigger_root_title)
-            .setMessage(getString(R.string.trigger_root_message, appInfo.appName, appInfo.packageName, appInfo.uid))
-            .setPositiveButton(R.string.confirm) { _, _ -> triggerRootRequest(appInfo) }
-            .setNegativeButton(R.string.cancel, null)
+            .setTitle("Trigger Root")
+            .setMessage("Request root for ${appInfo.appName}?")
+            .setPositiveButton("OK") { _, _ -> triggerRootRequest(appInfo) }
+            .setNegativeButton("Cancel", null)
             .show()
     }
 
     private fun triggerRootRequest(appInfo: AppInfo) {
-        CoroutineScope(Dispatchers.IO).launch {
+        executor.execute {
             try {
                 Runtime.getRuntime().exec(arrayOf("su", "-c", "su ${appInfo.uid} -c su"))
-                delay(500)
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@MainActivity, getString(R.string.trigger_success, appInfo.appName), Toast.LENGTH_SHORT).show()
+                runOnUiThread {
+                    Toast.makeText(this, "Triggered: ${appInfo.appName}", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@MainActivity, getString(R.string.trigger_failed, e.message), Toast.LENGTH_SHORT).show()
+                runOnUiThread {
+                    Toast.makeText(this, "Failed", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -191,7 +157,6 @@ class MainActivity : AppCompatActivity() {
             holder.tvAppName.text = app.appName
             holder.tvPackageName.text = app.packageName
             holder.tvUid.text = "UID: ${app.uid}"
-            holder.tvAppName.setTextColor(if (app.isSystemApp) 0xFF888888.toInt() else 0xFF000000.toInt())
             holder.itemView.setOnClickListener { onItemClick(app) }
         }
 

@@ -1,15 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">rootlist</string>
-    <string name="header_text">刷机做环境找微信S78910JQKKKAA</string>
-    <string name="root_granted">✓ 已获取Root权限 - 点击应用触发授权</string>
-    <string name="root_not_granted">✗ 未获取Root权限 - 请先授予本应用Root权限</string>
-    <string name="permission_error">无法获取应用列表，请检查权限</string>
-    <string name="need_root_first">请先授予本应用Root权限</string>
-    <string name="trigger_root_title">触发Root授权</string>
-    <string name="trigger_root_message">是否为 %1$s 触发Root权限申请弹窗？\n\n包名: %2$s\nUID: %3$d</string>
-    <string name="confirm">确定</string>
-    <string name="cancel">取消</string>
-    <string name="trigger_success">已触发 %1$s 的Root授权请求</string>
-    <string name="trigger_failed">执行失败: %1$s</string>
 </resources>
