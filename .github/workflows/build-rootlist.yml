@@ -17,10 +17,11 @@ jobs:
       
     - name: Clean conflicting resources
       run: |
-        # 删除所有mipmap目录中的冲突文件
         find app/src/main/res/mipmap-* -type f \( -name "*.png" -o -name "*.webp" -o -name "*.xml" \) -delete 2>/dev/null || true
-        # 确保drawable中的图标存在
-        ls -la app/src/main/res/drawable/
+        echo "=== Drawable files ==="
+        ls -la app/src/main/res/drawable/ || true
+        echo "=== Remaining mipmap files ==="
+        find app/src/main/res/mipmap-* -type f 2>/dev/null || echo "No mipmap files"
       
     - name: Set up JDK 17
       uses: actions/setup-java@v4
@@ -33,7 +34,7 @@ jobs:
       run: chmod +x gradlew
       
     - name: Build Release APK
-      run: ./gradlew assembleRelease
+      run: ./gradlew assembleRelease --stacktrace --info 2>&1 | tail -500
       
     - name: Build Debug APK
       run: ./gradlew assembleDebug
