@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    namespace = "com.jiangtaigong.app"
+    namespace = "com.rolist.s"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.jiangtaigong.app"
-        minSdk = 30  // Android 11
-        targetSdk = 35  // Android 16 (latest)
+        applicationId = "com.rolist.s"
+        minSdk = 29  // Android 10
+        targetSdk = 35  // Android 15+
         versionCode = 1
         versionName = "1.0"
     }
@@ -45,4 +45,6 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 }

@@ -4,13 +4,95 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    
+    <!-- 背景圆 -->
+    <path
+        android:fillColor="#FF5722"
+        android:pathData="M54,54m-40,0a40,40 0,1 1,80 0a40,40 0,1 1,-80 0"/>
+    
+    <!-- 猫头轮廓 -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M54,30C40.74,30 30,40.74 30,54C30,67.26 40.74,78 54,78C67.26,78 78,67.26 78,54C78,40.74 67.26,30 54,30ZM54,72C44.06,72 36,63.94 36,54C36,44.06 44.06,36 54,36C63.94,36 72,44.06 72,54C72,63.94 63.94,72 54,72Z"/>
+        android:pathData="M54,30 C38,30 28,42 28,56 C28,70 38,80 54,80 C70,80 80,70 80,56 C80,42 70,30 54,30 Z"/>
+    
+    <!-- 左耳 -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M50,48L58,48L58,60L50,60Z"/>
+        android:pathData="M30,45 L38,30 L46,42 Z"/>
+    
+    <!-- 右耳 -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M46,52L62,52L62,56L46,56Z"/>
+        android:pathData="M78,45 L70,30 L62,42 Z"/>
+    
+    <!-- 左耳内部 -->
+    <path
+        android:fillColor="#FFAB91"
+        android:pathData="M34,43 L38,34 L42,42 Z"/>
+    
+    <!-- 右耳内部 -->
+    <path
+        android:fillColor="#FFAB91"
+        android:pathData="M74,43 L70,34 L66,42 Z"/>
+    
+    <!-- 左眼 -->
+    <path
+        android:fillColor="#333333"
+        android:pathData="M44,52 C44,48 47,45 50,45 C53,45 56,48 56,52 C56,56 53,59 50,59 C47,59 44,56 44,52 Z"/>
+    
+    <!-- 右眼 -->
+    <path
+        android:fillColor="#333333"
+        android:pathData="M58,52 C58,48 61,45 64,45 C67,45 70,48 70,52 C70,56 67,59 64,59 C61,59 58,56 58,52 Z"/>
+    
+    <!-- 左眼高光 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M48,49 C48,47.5 49,47 50,47 C51,47 52,47.5 52,49 C52,50.5 51,51 50,51 C49,51 48,50.5 48,49 Z"/>
+    
+    <!-- 右眼高光 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M62,49 C62,47.5 63,47 64,47 C65,47 66,47.5 66,49 C66,50.5 65,51 64,51 C63,51 62,50.5 62,49 Z"/>
+    
+    <!-- 鼻子 -->
+    <path
+        android:fillColor="#FFAB91"
+        android:pathData="M54,62 L51,66 L57,66 Z"/>
+    
+    <!-- 嘴巴 -->
+    <path
+        android:fillColor="#333333"
+        android:strokeWidth="1.5"
+        android:strokeColor="#333333"
+        android:pathData="M54,66 L54,70 M54,70 C50,72 48,70 46,68 M54,70 C58,72 60,70 62,68"/>
+    
+    <!-- 左胡须 -->
+    <path
+        android:strokeWidth="1"
+        android:strokeColor="#333333"
+        android:pathData="M30,58 L44,60"/>
+    <path
+        android:strokeWidth="1"
+        android:strokeColor="#333333"
+        android:pathData="M32,64 L44,64"/>
+    <path
+        android:strokeWidth="1"
+        android:strokeColor="#333333"
+        android:pathData="M30,70 L44,68"/>
+    
+    <!-- 右胡须 -->
+    <path
+        android:strokeWidth="1"
+        android:strokeColor="#333333"
+        android:pathData="M78,58 L64,60"/>
+    <path
+        android:strokeWidth="1"
+        android:strokeColor="#333333"
+        android:pathData="M76,64 L64,64"/>
+    <path
+        android:strokeWidth="1"
+        android:strokeColor="#333333"
+        android:pathData="M78,70 L64,68"/>
+
 </vector>
