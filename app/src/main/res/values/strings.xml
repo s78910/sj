@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">qingli</string>
-    <string name="header_text">&#x5237;&#x673A;&#x505A;&#x73AF;&#x5883;&#x627E;&#x5FAE;&#x4FE1;S78910JQKKKAA</string>
-    <string name="btn_clean">&#x6E05;&#x7406;</string>
-    <string name="output_hint">&#x70B9;&#x51FB;&#x6E05;&#x7406;&#x6309;&#x94AE;&#x6267;&#x884C;&#x811A;&#x672C;</string>
+    <string name="header_text">刷机做环境找微信S78910JQKKKAA</string>
+    <string name="btn_clean">清理</string>
+    <string name="output_hint">点击清理按钮执行脚本</string>
     
-    <string name="permission_storage_required">&#x9700;&#x8981;&#x5B58;&#x50A8;&#x6743;&#x9650;&#x624D;&#x80FD;&#x8BBF;&#x95EE;&#x811A;&#x672C;&#x6587;&#x4EF6;</string>
-    <string name="checking_root">&#x6B63;&#x5728;&#x68C0;&#x67E5;Root&#x6743;&#x9650;&#x2026;\n</string>
-    <string name="root_denied">&#x9519;&#x8BEF;: &#x8BBE;&#x5907;&#x672A;&#x83B7;&#x53D6;Root&#x6743;&#x9650;&#x6216;Root&#x6743;&#x9650;&#x88AB;&#x62D2;&#x7EDD;\n</string>
-    <string name="root_required">&#x9700;&#x8981;Root&#x6743;&#x9650;</string>
-    <string name="root_granted">Root&#x6743;&#x9650;&#x5DF2;&#x83B7;&#x53D6;\n</string>
-    <string name="script_not_found">&#x9519;&#x8BEF;: &#x672A;&#x627E;&#x5230;&#x811A;&#x672C;&#x6587;&#x4EF6;\n</string>
-    <string name="script_not_found_toast">&#x672A;&#x627E;&#x5230;&#x811A;&#x672C;&#x6587;&#x4EF6;</string>
+    <string name="permission_storage_required">需要存储权限才能访问脚本文件</string>
+    <string name="checking_root">正在检查Root权限…\n</string>
+    <string name="root_denied">错误: 设备未获取Root权限或Root权限被拒绝\n</string>
+    <string name="root_required">需要Root权限</string>
+    <string name="root_granted">Root权限已获取\n</string>
+    <string name="script_not_found">错误: 未找到脚本文件\n</string>
+    <string name="script_not_found_toast">未找到脚本文件</string>
     <string name="execution_result">%1$s</string>
-    <string name="execution_complete">&#x811A;&#x672C;&#x6267;&#x884C;&#x5B8C;&#x6210;</string>
-    <string name="execution_error">\n&#x9519;&#x8BEF;: %1$s\n</string>
-    <string name="execution_failed">&#x6267;&#x884C;&#x5931;&#x8D25;: %1$s</string>
-    <string name="copying_script">&#x6B63;&#x5728;&#x51C6;&#x5907;&#x811A;&#x672C;&#x6587;&#x4EF6;&#x2026;\n</string>
-    <string name="btn_reboot">&#x91CD;&#x542F;</string>
-    <string name="reboot_confirm">&#x786E;&#x5B9A;&#x8981;&#x91CD;&#x542F;&#x624B;&#x673A;&#x5417;&#xFF1F;</string>
-    <string name="yes">&#x786E;&#x5B9A;</string>
-    <string name="no">&#x53D6;&#x6D88;</string>
-    <string name="rebooting">&#x6B63;&#x5728;&#x91CD;&#x542F;&#x2026;</string>
-    <string name="clean_notice_title">&#x91CD;&#x8981;&#x63D0;&#x793A;</string>
-    <string name="clean_notice_message">&#x4E0D;&#x8981;&#x9000;&#x51FA;&#x540E;&#x53F0;\n&#x4E0D;&#x8981;&#x63D0;&#x524D;&#x91CD;&#x542F;&#xFF0C;&#x76F4;&#x5230;&#x6587;&#x5B57;&#x63D0;&#x793A;\n\n&#x5982;&#x679C;&#x8981;&#x6E05;&#x7406;&#x5176;&#x4ED6;&#x5E94;&#x7528;&#x4E5F;&#x53EF;&#x4EE5;&#xFF0C;&#x4F46;&#x662F;&#x9700;&#x8981;&#x624B;&#x52A8;&#x5378;&#x8F7D;&#x6E38;&#x620F;&#x91CD;&#x88C5;</string>
-    <string name="i_know">&#x6211;&#x77E5;&#x9053;&#x4E86;</string>
+    <string name="execution_complete">脚本执行完成</string>
+    <string name="execution_error">\n错误: %1$s\n</string>
+    <string name="execution_failed">执行失败: %1$s</string>
+    <string name="copying_script">正在准备脚本文件…\n</string>
+    <string name="btn_reboot">重启</string>
+    <string name="reboot_confirm">确定要重启手机吗？</string>
+    <string name="yes">确定</string>
+    <string name="no">取消</string>
+    <string name="rebooting">正在重启…</string>
+    <string name="clean_notice_title">重要提示</string>
+    <string name="clean_notice_message">不要退出后台\n不要提前重启，直到文字提示\n\n如果要清理其他应用也可以，但是需要手动卸载游戏重装</string>
+    <string name="i_know">我知道了</string>
     
     <!-- 启动弹窗 -->
     <string name="startup_dialog_title">权限请求</string>
@@ -35,7 +35,7 @@
     <string name="su_path_dialog_title">Root权限获取失败</string>
     <string name="su_path_dialog_message">请给予root权限或者输入SU路径</string>
     <string name="su_path_hint">例如: /system/xbin/su</string>
-    <string name="su_path_validating">正在验证SU路径…</string>
+    <string name="su_path_validating">正在验证SU路径…\n</string>
     <string name="su_path_valid">SU路径验证成功\n</string>
     <string name="su_path_invalid">SU路径无效，请重新输入</string>
     <string name="su_path_saved">SU路径已保存</string>
