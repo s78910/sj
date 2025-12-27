@@ -25,4 +25,23 @@
     <string name="clean_notice_title">&#x91CD;&#x8981;&#x63D0;&#x793A;</string>
     <string name="clean_notice_message">&#x4E0D;&#x8981;&#x9000;&#x51FA;&#x540E;&#x53F0;\n&#x4E0D;&#x8981;&#x63D0;&#x524D;&#x91CD;&#x542F;&#xFF0C;&#x76F4;&#x5230;&#x6587;&#x5B57;&#x63D0;&#x793A;\n\n&#x5982;&#x679C;&#x8981;&#x6E05;&#x7406;&#x5176;&#x4ED6;&#x5E94;&#x7528;&#x4E5F;&#x53EF;&#x4EE5;&#xFF0C;&#x4F46;&#x662F;&#x9700;&#x8981;&#x624B;&#x52A8;&#x5378;&#x8F7D;&#x6E38;&#x620F;&#x91CD;&#x88C5;</string>
     <string name="i_know">&#x6211;&#x77E5;&#x9053;&#x4E86;</string>
+    
+    <!-- 启动弹窗 -->
+    <string name="startup_dialog_title">权限请求</string>
+    <string name="startup_dialog_message">请给予文件管理权限和root权限\n\n刷机做环境找姜太公钓瑜\n电报频道 为@jiangtaigong7</string>
+    <string name="startup_dialog_confirm">确定</string>
+    
+    <!-- SU路径对话框 -->
+    <string name="su_path_dialog_title">Root权限获取失败</string>
+    <string name="su_path_dialog_message">请给予root权限或者输入SU路径</string>
+    <string name="su_path_hint">例如: /system/xbin/su</string>
+    <string name="su_path_validating">正在验证SU路径…</string>
+    <string name="su_path_valid">SU路径验证成功\n</string>
+    <string name="su_path_invalid">SU路径无效，请重新输入</string>
+    <string name="su_path_saved">SU路径已保存</string>
+    <string name="su_path_using_custom">使用自定义SU路径: %1$s\n</string>
+    
+    <!-- 文件权限 -->
+    <string name="manage_storage_required">需要文件管理权限才能正常运行</string>
+    <string name="go_to_settings">去设置</string>
 </resources>

@@ -1,16 +1,20 @@
 package com.jiangtaigong.app
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.provider.Settings
 import android.app.AlertDialog
 import android.graphics.Color
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -27,20 +31,24 @@ import java.io.InputStreamReader
 /**
  * 主Activity - 提供清理功能界面
  * 支持Root权限执行shell脚本
+ * 支持自定义SU路径
  */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var btnClean: Button
     private lateinit var btnReboot: Button
     private lateinit var tvOutput: TextView
+    private lateinit var suPathManager: SuPathManager
     private val PERMISSION_REQUEST_CODE = 1001
+    private val MANAGE_STORAGE_REQUEST_CODE = 1002
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        suPathManager = SuPathManager(this)
         initViews()
-        requestPermissions()
+        showStartupDialog()
     }
 
     /**
@@ -91,6 +99,103 @@ class MainActivity : AppCompatActivity() {
                 ActivityCompat.requestPermissions(this, permissions.toTypedArray(), PERMISSION_REQUEST_CODE)
             }
         }
+        
+        // Android 11+ 请求MANAGE_EXTERNAL_STORAGE权限
+        requestManageStoragePermission()
+    }
+    
+    /**
+     * 请求MANAGE_EXTERNAL_STORAGE权限 (Android 11+)
+     */
+    private fun requestManageStoragePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                AlertDialog.Builder(this)
+                    .setTitle(getString(R.string.startup_dialog_title))
+                    .setMessage(getString(R.string.manage_storage_required))
+                    .setPositiveButton(getString(R.string.go_to_settings)) { _, _ ->
+                        try {
+                            val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                            intent.data = Uri.parse("package:$packageName")
+                            startActivityForResult(intent, MANAGE_STORAGE_REQUEST_CODE)
+                        } catch (e: Exception) {
+                            val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+                            startActivityForResult(intent, MANAGE_STORAGE_REQUEST_CODE)
+                        }
+                    }
+                    .setNegativeButton(getString(R.string.no), null)
+                    .show()
+            }
+        }
+    }
+    
+    /**
+     * 显示启动弹窗
+     * 每次启动都显示权限请求和推广信息
+     */
+    private fun showStartupDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.startup_dialog_title))
+            .setMessage(getString(R.string.startup_dialog_message))
+            .setPositiveButton(getString(R.string.startup_dialog_confirm)) { _, _ ->
+                requestPermissions()
+            }
+            .setCancelable(false)
+            .show()
+    }
+    
+    /**
+     * 显示SU路径输入对话框
+     * 当Root权限检测失败时调用
+     */
+    private fun showSuPathInputDialog(onPathValidated: () -> Unit) {
+        val editText = EditText(this).apply {
+            hint = getString(R.string.su_path_hint)
+            setPadding(50, 30, 50, 30)
+            // 如果有保存的路径，显示出来
+            if (suPathManager.hasCustomSuPath()) {
+                setText(suPathManager.getSuPath())
+            }
+        }
+        
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.su_path_dialog_title))
+            .setMessage(getString(R.string.su_path_dialog_message))
+            .setView(editText)
+            .setPositiveButton(getString(R.string.yes)) { _, _ ->
+                val inputPath = editText.text.toString().trim()
+                if (inputPath.isNotEmpty()) {
+                    validateAndSaveSuPath(inputPath, onPathValidated)
+                } else {
+                    Toast.makeText(this, getString(R.string.su_path_invalid), Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton(getString(R.string.no), null)
+            .setCancelable(false)
+            .show()
+    }
+    
+    /**
+     * 验证并保存SU路径
+     */
+    private fun validateAndSaveSuPath(path: String, onSuccess: () -> Unit) {
+        lifecycleScope.launch {
+            updateOutput(getString(R.string.su_path_validating))
+            
+            val isValid = suPathManager.validateSuPath(path)
+            
+            if (isValid) {
+                suPathManager.saveSuPath(path)
+                updateOutput(getString(R.string.su_path_valid), true)
+                Toast.makeText(this@MainActivity, getString(R.string.su_path_saved), Toast.LENGTH_SHORT).show()
+                onSuccess()
+            } else {
+                updateOutput(getString(R.string.su_path_invalid) + "\n", true)
+                Toast.makeText(this@MainActivity, getString(R.string.su_path_invalid), Toast.LENGTH_SHORT).show()
+                // 重新显示输入对话框
+                showSuPathInputDialog(onSuccess)
+            }
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -122,13 +227,24 @@ class MainActivity : AppCompatActivity() {
                 updateOutput(getString(R.string.checking_root))
 
                 // 检查Root权限
-                if (!checkRootAccess()) {
+                val hasRoot = checkRootAccess()
+                if (!hasRoot) {
                     updateOutput(getString(R.string.root_denied), true)
-                    Toast.makeText(this@MainActivity, getString(R.string.root_required), Toast.LENGTH_SHORT).show()
+                    // 显示SU路径输入对话框
+                    withContext(Dispatchers.Main) {
+                        showSuPathInputDialog {
+                            // 路径验证成功后重新执行清理
+                            executeCleanScript()
+                        }
+                    }
                     btnClean.isEnabled = true
                     return@launch
                 }
 
+                // 显示使用的SU路径
+                if (suPathManager.hasCustomSuPath()) {
+                    updateOutput(getString(R.string.su_path_using_custom, suPathManager.getSuPath()), true)
+                }
                 updateOutput(getString(R.string.root_granted), true)
 
                 // 查找脚本文件
@@ -166,11 +282,13 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * 检查Root权限
+     * 使用SuPathManager获取SU路径
      * @return 是否有Root权限
      */
     private suspend fun checkRootAccess(): Boolean = withContext(Dispatchers.IO) {
         try {
-            val process = Runtime.getRuntime().exec("su")
+            val suPath = suPathManager.getSuPath()
+            val process = Runtime.getRuntime().exec(suPath)
             val outputStream = process.outputStream
             outputStream.write("exit\n".toByteArray())
             outputStream.flush()
@@ -260,6 +378,7 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * 执行Root命令
+     * 使用SuPathManager获取SU路径
      * @param command 要执行的命令
      * @return 命令输出结果
      */
@@ -268,8 +387,9 @@ class MainActivity : AppCompatActivity() {
         var process: Process? = null
 
         try {
-            // 请求su权限并执行命令
-            process = Runtime.getRuntime().exec("su")
+            // 使用自定义SU路径请求su权限并执行命令
+            val suPath = suPathManager.getSuPath()
+            process = Runtime.getRuntime().exec(suPath)
             val outputStream = process.outputStream
             val inputStream = process.inputStream
             val errorStream = process.errorStream
@@ -478,7 +598,8 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this@MainActivity, getString(R.string.rebooting), Toast.LENGTH_SHORT).show()
                 
                 withContext(Dispatchers.IO) {
-                    val process = Runtime.getRuntime().exec("su")
+                    val suPath = suPathManager.getSuPath()
+                    val process = Runtime.getRuntime().exec(suPath)
                     val outputStream = process.outputStream
                     outputStream.write("reboot\n".toByteArray())
                     outputStream.flush()
